@@ -64,6 +64,7 @@ var settings = {
   rotateX: 0.0,
   rotateY: 0.0,
   rotateZ: 0.0,
+  zoom: 1,
 };
 
 var matrixStack = [];
@@ -90,6 +91,7 @@ function init() {
   gui.add(settings, "rotateX", -180, 180);
   gui.add(settings, "rotateY", -180, 180);
   gui.add(settings, "rotateZ", -180, 180);
+  gui.add(settings, "zoom", 0.5, 2.0);
 
   // Posicionar el GUI debajo del canvas
   const canvasRect = canvas.getBoundingClientRect();
@@ -194,6 +196,7 @@ function render() {
   mat4.rotateX(modelMatrix, modelMatrix, (settings.rotateX / 180) * Math.PI);
   mat4.rotateY(modelMatrix, modelMatrix, (settings.rotateY / 180) * Math.PI);
   mat4.rotateZ(modelMatrix, modelMatrix, (settings.rotateZ / 180) * Math.PI);
+  mat4.scale(modelMatrix, modelMatrix, [settings.zoom, settings.zoom, 1]);
   gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
   // draw sun
