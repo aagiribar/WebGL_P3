@@ -61,6 +61,8 @@ var moon = {
 var settings = {
   translateX: 0.0,
   translateY: 0.0,
+  rotateX: 0.0,
+  rotateY: 0.0,
   rotateZ: 0.0,
 };
 
@@ -85,6 +87,8 @@ function init() {
   var gui = new dat.GUI();
   gui.add(settings, "translateX", -1.0, 1.0, 0.01);
   gui.add(settings, "translateY", -1.0, 1.0, 0.01);
+  gui.add(settings, "rotateX", -180, 180);
+  gui.add(settings, "rotateY", -180, 180);
   gui.add(settings, "rotateZ", -180, 180);
 
   // Posicionar el GUI debajo del canvas
@@ -187,6 +191,8 @@ function render() {
     settings.translateY,
     0,
   ]);
+  mat4.rotateX(modelMatrix, modelMatrix, (settings.rotateX / 180) * Math.PI);
+  mat4.rotateY(modelMatrix, modelMatrix, (settings.rotateY / 180) * Math.PI);
   mat4.rotateZ(modelMatrix, modelMatrix, (settings.rotateZ / 180) * Math.PI);
   gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
