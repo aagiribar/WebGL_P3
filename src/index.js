@@ -273,6 +273,11 @@ function render() {
     if (i > 0) {
       // draw orbit for all except the sun
       drawOrbit(mainObjects[i], modelMatrix);
+      if (mainObjects[i].satellites !== undefined) {
+        for (let j = 0; j < mainObjects[i].satellites.length; j++) {
+          drawSatelliteOrbit(mainObjects[i].satellites[j], mainObjects[i], modelMatrix);
+        }
+      }
     }
   }
 
@@ -331,8 +336,8 @@ function drawCircle() {
 
   for (let i = 0; i <= numSegments; i++) {
     const angle = i * angleStep;
-    const x = 0.5 * Math.cos(angle);
-    const y = 0.5 * Math.sin(angle);
+    const x = 1 * Math.cos(angle);
+    const y = 1 * Math.sin(angle);
     vertices.push(x, y);
   }
 
@@ -342,6 +347,7 @@ function drawCircle() {
   gl.drawArrays(gl.LINE_LOOP, 0, numSegments + 1);
 }
 
+// Function to draw the orbit of a planet
 function drawOrbit(obj, modelMatrix) {
   glPushMatrix();
 
@@ -353,9 +359,24 @@ function drawOrbit(obj, modelMatrix) {
     mat4.rotateY(modelMatrix, modelMatrix, (obj.rotateY / 180) * Math.PI);
   }
 
-  mat4.scale(modelMatrix, modelMatrix, [obj.x * 2, obj.x * 2, 1]);
+  mat4.scale(modelMatrix, modelMatrix, [obj.x, obj.x, 1]);
   gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
   gl.uniform4fv(colorLocation, obj.color);
+  drawCircle();
+
+  glPopMatrix();
+}
+
+// Function to draw the orbit of a satellite around its parent object
+function drawSatelliteOrbit(satellite, parentObj, modelMatrix) {
+  glPushMatrix();
+
+  mat4.rotateZ(modelMatrix, modelMatrix, parentObj.angle);
+  mat4.translate(modelMatrix, modelMatrix, [parentObj.x, parentObj.y, 0]);
+  mat4.scale(modelMatrix, modelMatrix, [parentObj.width, parentObj.height, 1]);
+  mat4.scale(modelMatrix, modelMatrix, [satellite.x, satellite.x, 1]);
+  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+  gl.uniform4fv(colorLocation, satellite.color);
   drawCircle();
 
   glPopMatrix();
