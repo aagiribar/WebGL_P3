@@ -26,12 +26,14 @@ void main(void) {
 }
 `;
 
+// Global variables
 var canvas, gl;
 var colorLocation;
 var vertex_buffer;
 var modelMatrixLoc;
 var modelMatrix;
 
+// Simulation objects
 var sun = {
   x: 0,
   y: 0,
@@ -47,17 +49,9 @@ var venus = {
   height: 0.1,
   color: [1, 0.5, 0, 1],
   angle: 0.0,
+  rotationSpeed: 0.008,
   rotateX: 40.0,
 }
-
-var earth = {
-  x: 0.6,
-  y: 0,
-  width: 0.1,
-  height: 0.1,
-  color: [0.2, 0.2, 1, 1],
-  angle: 0.0,
-};
 
 var moon = {
   x: 1.3,
@@ -66,6 +60,28 @@ var moon = {
   height: 0.4,
   color: [1, 1, 1, 1],
   angle: 0.0,
+  rotationSpeed: 0.02,
+};
+
+var earth = {
+  x: 0.6,
+  y: 0,
+  width: 0.1,
+  height: 0.1,
+  color: [0.2, 0.2, 1, 1],
+  angle: 0.0,
+  rotationSpeed: 0.01,
+  satellites: [moon]
+};
+
+var fobos = {
+  x: 1.3,
+  y: 0,
+  width: 0.4,
+  height: 0.4,
+  color: [1, 1, 0.75, 1],
+  angle: 0.0,
+  rotationSpeed: 0.03,
 };
 
 var mars = {
@@ -75,17 +91,14 @@ var mars = {
   height: 0.15,
   color: [1, 0, 0, 1],
   angle: 0.0,
+  rotationSpeed: 0.015,
+  satellites: [fobos]
 }
 
-var fobos = {
-  x: 1.3,
-  y: 0,
-  width: 0.4,
-  height: 0.4,
-  color: [1, 1, 0.75, 1],
-  angle: 0.0,
-};
+// Main objects array
+var mainObjects = [sun, venus, earth, mars];
 
+// GUI settings
 var settings = {
   translateX: 0.0,
   translateY: 0.0,
@@ -239,74 +252,12 @@ function render() {
   mat4.scale(modelMatrix, modelMatrix, [settings.zoom, settings.zoom, 1]);
   gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
-  // draw sun
-  glPushMatrix();
-  mat4.scale(modelMatrix, modelMatrix, [sun.width, sun.height, 1]);
-  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-  gl.uniform4fv(colorLocation, sun.color);
-  drawSquare();
-  glPopMatrix();
-
-  // draw venus
-  glPushMatrix();
-  mat4.rotateX(modelMatrix, modelMatrix, (venus.rotateX / 180) * Math.PI);
-  venus.angle += 0.008 * settings.speed;
-  mat4.rotateZ(modelMatrix, modelMatrix, venus.angle);
-  mat4.translate(modelMatrix, modelMatrix, [venus.x, venus.y, 0]);
-  mat4.scale(modelMatrix, modelMatrix, [venus.width, venus.height, 1]);
-  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-  gl.uniform4fv(colorLocation, venus.color);
-  drawSquare();
-  glPopMatrix();
-
-  // draw earth
-  glPushMatrix();
-  earth.angle += 0.01 * settings.speed;
-  mat4.rotateZ(modelMatrix, modelMatrix, earth.angle);
-  mat4.translate(modelMatrix, modelMatrix, [earth.x, earth.y, 0]);
-  mat4.scale(modelMatrix, modelMatrix, [earth.width, earth.height, 1]);
-  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-  gl.uniform4fv(colorLocation, earth.color);
-  drawSquare();
-
-  // draw moon
-  glPushMatrix();
-  moon.angle += 0.02 * settings.speed;
-  mat4.rotateZ(modelMatrix, modelMatrix, moon.angle);
-  mat4.translate(modelMatrix, modelMatrix, [moon.x, moon.y, 0]);
-  mat4.scale(modelMatrix, modelMatrix, [moon.width, moon.height, 1]);
-  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-  gl.uniform4fv(colorLocation, moon.color);
-  drawSquare();
-  glPopMatrix();
-  glPopMatrix();
-
-  // draw mars
-  glPushMatrix();
-  mars.angle += 0.015 * settings.speed;
-  mat4.rotateZ(modelMatrix, modelMatrix, mars.angle);
-  mat4.translate(modelMatrix, modelMatrix, [mars.x, mars.y, 0]);
-  mat4.scale(modelMatrix, modelMatrix, [mars.width, mars.height, 1]);
-  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-  gl.uniform4fv(colorLocation, mars.color);
-  drawSquare();
-
-  // draw moon of mars
-  glPushMatrix();
-  fobos.angle += 0.03 * settings.speed;
-  mat4.rotateZ(modelMatrix, modelMatrix, fobos.angle);
-  mat4.translate(modelMatrix, modelMatrix, [fobos.x, fobos.y, 0]);
-  mat4.scale(modelMatrix, modelMatrix, [fobos.width, fobos.height, 1]);
-  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-  gl.uniform4fv(colorLocation, fobos.color);
-  drawSquare();
-  glPopMatrix();
-  glPopMatrix();
+  for (let i = 0; i < mainObjects.length; i++) {
+    drawObject(mainObjects[i], modelMatrix);
+  }
 
   // Unbind the buffer
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-  //document.getElementById("debug").textContent = "y = " + player1.y.toFixed(2);
 
   // start animation loop
   window.requestAnimationFrame(render);
@@ -319,6 +270,35 @@ function drawSquare() {
   // Pass the vertex data to the buffer
   gl.bufferData(gl.ARRAY_BUFFER, v, gl.STATIC_DRAW);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
+function drawObject(obj, modelMatrix) {
+  glPushMatrix();
+  if (obj.rotateX !== undefined) {
+    mat4.rotateX(modelMatrix, modelMatrix, (obj.rotateX / 180) * Math.PI);
+  }
+
+  if (obj.rotateY !== undefined) {
+    mat4.rotateY(modelMatrix, modelMatrix, (obj.rotateY / 180) * Math.PI);
+  }
+
+  if (obj.angle !== undefined) {
+    obj.angle += obj.rotationSpeed * settings.speed;
+    mat4.rotateZ(modelMatrix, modelMatrix, obj.angle);
+  }
+
+  mat4.translate(modelMatrix, modelMatrix, [obj.x, obj.y, 0]);
+  mat4.scale(modelMatrix, modelMatrix, [obj.width, obj.height, 1]);
+  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+  gl.uniform4fv(colorLocation, obj.color);
+  drawSquare();
+
+  if (obj.satellites !== undefined) {
+    for (let i = 0; i < obj.satellites.length; i++) {
+      drawObject(obj.satellites[i], modelMatrix);
+    }
+  }
+  glPopMatrix();
 }
 
 // CÓDIGO PRINCIPAL
