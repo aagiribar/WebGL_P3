@@ -107,7 +107,7 @@ var mars = {
   satellites: [fobos]
 }
 
-// Main objects array
+// Main objects array (non satellites)
 var mainObjects = [sun, mercury, venus, earth, mars];
 
 // GUI settings
@@ -121,14 +121,17 @@ var settings = {
   speed: 1,
 };
 
+// Model matrix stack
 var matrixStack = [];
 
+// Function to push matrices onto the stack
 function glPushMatrix() {
   const matrix = mat4.create();
   mat4.copy(matrix, modelMatrix);
   matrixStack.push(matrix);
 }
 
+// Function to pop matrices off the stack
 function glPopMatrix() {
   modelMatrix = matrixStack.pop();
 }
@@ -264,8 +267,13 @@ function render() {
   mat4.scale(modelMatrix, modelMatrix, [settings.zoom, settings.zoom, 1]);
   gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
+  // Draw all objects
   for (let i = 0; i < mainObjects.length; i++) {
     drawObject(mainObjects[i], modelMatrix);
+    if (i > 0) {
+      // draw orbit for all except the sun
+      drawOrbit(mainObjects[i], modelMatrix);
+    }
   }
 
   // Unbind the buffer
@@ -275,6 +283,7 @@ function render() {
   window.requestAnimationFrame(render);
 }
 
+// Function to draw a square
 function drawSquare() {
   const v = new Float32Array([
     -0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5,
@@ -284,6 +293,7 @@ function drawSquare() {
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
+// Function to draw an object and its satellites
 function drawObject(obj, modelMatrix) {
   glPushMatrix();
   if (obj.rotateX !== undefined) {
@@ -310,6 +320,44 @@ function drawObject(obj, modelMatrix) {
       drawObject(obj.satellites[i], modelMatrix);
     }
   }
+  glPopMatrix();
+}
+
+// Function to draw a circle
+function drawCircle() {
+  const numSegments = 100;
+  const angleStep = (2 * Math.PI) / numSegments;
+  const vertices = [];
+
+  for (let i = 0; i <= numSegments; i++) {
+    const angle = i * angleStep;
+    const x = 0.5 * Math.cos(angle);
+    const y = 0.5 * Math.sin(angle);
+    vertices.push(x, y);
+  }
+
+  const v = new Float32Array(vertices);
+  // Pass the vertex data to the buffer
+  gl.bufferData(gl.ARRAY_BUFFER, v, gl.STATIC_DRAW);
+  gl.drawArrays(gl.LINE_LOOP, 0, numSegments + 1);
+}
+
+function drawOrbit(obj, modelMatrix) {
+  glPushMatrix();
+
+  if (obj.rotateX !== undefined) {
+    mat4.rotateX(modelMatrix, modelMatrix, (obj.rotateX / 180) * Math.PI);
+  }
+
+  if (obj.rotateY !== undefined) {
+    mat4.rotateY(modelMatrix, modelMatrix, (obj.rotateY / 180) * Math.PI);
+  }
+
+  mat4.scale(modelMatrix, modelMatrix, [obj.x * 2, obj.x * 2, 1]);
+  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+  gl.uniform4fv(colorLocation, obj.color);
+  drawCircle();
+
   glPopMatrix();
 }
 
