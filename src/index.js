@@ -93,6 +93,7 @@ var settings = {
   rotateY: 0.0,
   rotateZ: 0.0,
   zoom: 1,
+  speed: 1,
 };
 
 var matrixStack = [];
@@ -120,6 +121,17 @@ function init() {
   gui.add(settings, "rotateY", -180, 180);
   gui.add(settings, "rotateZ", -180, 180);
   gui.add(settings, "zoom", 0.5, 2.0);
+  gui.add(settings, "speed", 0.1, 2.0);
+  gui.add({ reset: () => {
+    settings.translateX = 0.0;
+    settings.translateY = 0.0;
+    settings.rotateX = 0.0;
+    settings.rotateY = 0.0;
+    settings.rotateZ = 0.0;
+    settings.zoom = 1;
+    settings.speed = 1;
+    gui.updateDisplay();
+  }}, "reset");
 
   // Posicionar el GUI debajo del canvas
   const canvasRect = canvas.getBoundingClientRect();
@@ -238,7 +250,7 @@ function render() {
   // draw venus
   glPushMatrix();
   mat4.rotateX(modelMatrix, modelMatrix, (venus.rotateX / 180) * Math.PI);
-  venus.angle += 0.008;
+  venus.angle += 0.008 * settings.speed;
   mat4.rotateZ(modelMatrix, modelMatrix, venus.angle);
   mat4.translate(modelMatrix, modelMatrix, [venus.x, venus.y, 0]);
   mat4.scale(modelMatrix, modelMatrix, [venus.width, venus.height, 1]);
@@ -249,7 +261,7 @@ function render() {
 
   // draw earth
   glPushMatrix();
-  earth.angle += 0.01;
+  earth.angle += 0.01 * settings.speed;
   mat4.rotateZ(modelMatrix, modelMatrix, earth.angle);
   mat4.translate(modelMatrix, modelMatrix, [earth.x, earth.y, 0]);
   mat4.scale(modelMatrix, modelMatrix, [earth.width, earth.height, 1]);
@@ -259,7 +271,7 @@ function render() {
 
   // draw moon
   glPushMatrix();
-  moon.angle += 0.02;
+  moon.angle += 0.02 * settings.speed;
   mat4.rotateZ(modelMatrix, modelMatrix, moon.angle);
   mat4.translate(modelMatrix, modelMatrix, [moon.x, moon.y, 0]);
   mat4.scale(modelMatrix, modelMatrix, [moon.width, moon.height, 1]);
@@ -271,7 +283,7 @@ function render() {
 
   // draw mars
   glPushMatrix();
-  mars.angle += 0.015;
+  mars.angle += 0.015 * settings.speed;
   mat4.rotateZ(modelMatrix, modelMatrix, mars.angle);
   mat4.translate(modelMatrix, modelMatrix, [mars.x, mars.y, 0]);
   mat4.scale(modelMatrix, modelMatrix, [mars.width, mars.height, 1]);
@@ -281,7 +293,7 @@ function render() {
 
   // draw moon of mars
   glPushMatrix();
-  fobos.angle += 0.03;
+  fobos.angle += 0.03 * settings.speed;
   mat4.rotateZ(modelMatrix, modelMatrix, fobos.angle);
   mat4.translate(modelMatrix, modelMatrix, [fobos.x, fobos.y, 0]);
   mat4.scale(modelMatrix, modelMatrix, [fobos.width, fobos.height, 1]);
