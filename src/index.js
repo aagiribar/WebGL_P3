@@ -42,6 +42,18 @@ var sun = {
   color: [1, 1, 0, 1],
 };
 
+var mercury = {
+  x: 0.15,
+  y: 0,
+  width: 0.05,
+  height: 0.05,
+  color: [0.5, 0.5, 0.5, 1],
+  angle: 0.0,
+  rotationSpeed: 0.02,
+  rotateX: 60.0,
+  rotateY: 100.0,
+}
+
 var venus = {
   x: 0.3,
   y: 0,
@@ -96,7 +108,7 @@ var mars = {
 }
 
 // Main objects array
-var mainObjects = [sun, venus, earth, mars];
+var mainObjects = [sun, mercury, venus, earth, mars];
 
 // GUI settings
 var settings = {
