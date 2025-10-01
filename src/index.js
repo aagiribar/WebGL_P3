@@ -271,7 +271,7 @@ function render() {
   for (let i = 0; i < mainObjects.length; i++) {
     drawObject(mainObjects[i], modelMatrix);
     if (i > 0) {
-      // draw orbit for all except the sun
+      // Draw orbit for all objects except the sun
       drawOrbit(mainObjects[i], modelMatrix);
       if (mainObjects[i].satellites !== undefined) {
         for (let j = 0; j < mainObjects[i].satellites.length; j++) {
@@ -284,7 +284,7 @@ function render() {
   // Unbind the buffer
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  // start animation loop
+  // Start animation loop
   window.requestAnimationFrame(render);
 }
 
