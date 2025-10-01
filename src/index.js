@@ -40,6 +40,16 @@ var sun = {
   color: [1, 1, 0, 1],
 };
 
+var venus = {
+  x: 0.3,
+  y: 0,
+  width: 0.1,
+  height: 0.1,
+  color: [1, 0.5, 0, 1],
+  angle: 0.0,
+  rotateX: 40.0,
+}
+
 var earth = {
   x: 0.6,
   y: 0,
@@ -55,7 +65,25 @@ var moon = {
   width: 0.4,
   height: 0.4,
   color: [1, 1, 1, 1],
-  angle: 0,
+  angle: 0.0,
+};
+
+var mars = {
+  x: 1,
+  y: 0,
+  width: 0.15,
+  height: 0.15,
+  color: [1, 0, 0, 1],
+  angle: 0.0,
+}
+
+var fobos = {
+  x: 1.3,
+  y: 0,
+  width: 0.4,
+  height: 0.4,
+  color: [1, 1, 0.75, 1],
+  angle: 0.0,
 };
 
 var settings = {
@@ -207,6 +235,18 @@ function render() {
   drawSquare();
   glPopMatrix();
 
+  // draw venus
+  glPushMatrix();
+  mat4.rotateX(modelMatrix, modelMatrix, (venus.rotateX / 180) * Math.PI);
+  venus.angle += 0.008;
+  mat4.rotateZ(modelMatrix, modelMatrix, venus.angle);
+  mat4.translate(modelMatrix, modelMatrix, [venus.x, venus.y, 0]);
+  mat4.scale(modelMatrix, modelMatrix, [venus.width, venus.height, 1]);
+  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+  gl.uniform4fv(colorLocation, venus.color);
+  drawSquare();
+  glPopMatrix();
+
   // draw earth
   glPushMatrix();
   earth.angle += 0.01;
@@ -226,6 +266,29 @@ function render() {
   gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
   gl.uniform4fv(colorLocation, moon.color);
   drawSquare();
+  glPopMatrix();
+  glPopMatrix();
+
+  // draw mars
+  glPushMatrix();
+  mars.angle += 0.015;
+  mat4.rotateZ(modelMatrix, modelMatrix, mars.angle);
+  mat4.translate(modelMatrix, modelMatrix, [mars.x, mars.y, 0]);
+  mat4.scale(modelMatrix, modelMatrix, [mars.width, mars.height, 1]);
+  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+  gl.uniform4fv(colorLocation, mars.color);
+  drawSquare();
+
+  // draw moon of mars
+  glPushMatrix();
+  fobos.angle += 0.03;
+  mat4.rotateZ(modelMatrix, modelMatrix, fobos.angle);
+  mat4.translate(modelMatrix, modelMatrix, [fobos.x, fobos.y, 0]);
+  mat4.scale(modelMatrix, modelMatrix, [fobos.width, fobos.height, 1]);
+  gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+  gl.uniform4fv(colorLocation, fobos.color);
+  drawSquare();
+  glPopMatrix();
   glPopMatrix();
 
   // Unbind the buffer
